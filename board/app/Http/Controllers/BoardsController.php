@@ -1,10 +1,17 @@
 <?php
-
+/**********************************
+ * 프로젝트명 : laravel_board
+ * 디렉토리   : Controllers
+ * 파일명     : BoardsController.php
+ * 이력       :   v001 0526 CH.Bae new
+ *                v002 0530 CH.Bae 유효성 체크 추가
+**********************************/
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Boards;
-
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 class BoardsController extends Controller
 {
     /**
@@ -36,6 +43,15 @@ class BoardsController extends Controller
      */
     public function store(Request $req)
     {
+        // 유효성체크
+        // v002 add start
+        $req->validate([
+            'title' => 'required|between:3,30'
+            ,'content' => 'required|max:1000'
+        ]);
+        // v002 add end
+
+        
         $boards = new Boards([
             'title' => $req->input('title')
             ,'content' => $req->input('content')
@@ -78,8 +94,58 @@ class BoardsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $req, $id)
+    public function update(Request $request, $id)
     {
+        // 유효성체크
+        // ********** v002 add start **********
+
+        // ID를 리퀘스크객체에 머지
+        $arr = ['id' => $id];
+        // $req->merge($arr);
+        $request->request->add($arr);
+        // $request->validate([
+        //     'title' => 'required|between:3,30' // v002 add
+        //     ,'content' => 'required|max:2000'
+        //     ,'id' => 'required|exists.boards|integer'
+        // ]);
+
+
+        // 유효성 검사 방법 2
+        $validator = Validator::make(
+            $request->only('id', 'title', 'content') // 필요한 값만 가져오는 방법
+            ,[
+                'id' => 'required|integer'
+                ,'title' => 'required|between:3,30'
+                ,'content' => 'required|max:2000'
+            ]
+        );
+
+        if($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput($request->only('title', 'content'));
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        // $validator = Validator::make(['id' -> $id],[
+        //     'id' => 'required|exists.boards|integer'
+        // ]);
+        // if($validator->fails()){
+        //     return view('edit')->withErrors($validator);
+        // }
+        // ********** v002 add end **********
+
         // $boards = Boards::where('id', $id)->update(['title' => $req->input('title'),'content' => $req->input('content')]);
         // $boards = Boards::findOrFail($id);
 
@@ -87,8 +153,8 @@ class BoardsController extends Controller
 
     // 쌤이랑 한거(ORM을 이용한)
     $result = Boards::find($id);
-    $result->title = $req->title;
-    $result->content = $req->content;
+    $result->title = $request->title;
+    $result->content = $request->content;
     $result->save();
 
     // return redirect('/boards/'.$id);
