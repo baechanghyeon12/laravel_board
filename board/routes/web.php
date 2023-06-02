@@ -35,3 +35,4 @@ Route::get('/users/logout', [UserController::class, 'logout'])->name('users.logo
 Route::get('/users/withdraw', [UserController::class, 'withdraw'])->name('users.withdraw');
 Route::get('/users/usersedit', [UserController::class, 'usersedit'])->name('users.edit');
 Route::put('/users/usersupdate/{id}', [UserController::class, 'usersupdate'])->name('users.update');
+

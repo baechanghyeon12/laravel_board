@@ -13,22 +13,37 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 
 class UserController extends Controller
 {
     function login() {
+
+        $arr['key'] = 'test';
+        $arr['kim'] = 'park';
+        Log::emergency('emergency',$arr);
+        Log::alert('alert',$arr);
+        Log::critical('critical',$arr);
+        Log::error('error',$arr);
+        Log::warning('warning',$arr);
+        Log::notice('notice',$arr);
+        Log::info('info',$arr);
+        Log::debug('debug',$arr);
+        
         return view('login');
     }
     
     function loginpost(Request $req) {
+        Log::debug('로그인 시작');
         // 유효성 체크
         $req->validate([
             'email'    => 'required|email|max:100'
             ,'password' => 'required|regex:/^(?=.*[a-zA-z])(?=.*[!@#$%^*-])(?=.*[0-9]).{8,20}$/'
         ]);
-
+        
+        Log::debug('유효성 ok');
         // 유저정보 습득
         $user = User::where('email', $req->email)->first();
         if(!$user || !(Hash::check($req->password, $user->password))){
